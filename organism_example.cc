@@ -1,5 +1,4 @@
 #include <string>
-#include <vector>
 #include "organism.h"
 
 using namespace std;
