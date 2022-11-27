@@ -3,19 +3,19 @@
 
 #include <concepts>
 #include <optional>
+#include <type_traits>
 
 /*
 
  Koniecznie używać typename
 
- template<...>
- using Carnivore = Organism(...);
+ // użyć static_assert do sprawdzenia typów
+ // korzystać z <type_traits>
+ // if constexpr is evaluated at compile time, whereas if is not - zamiast SFINAE
+ // (branches get be rejected at compile time and never be compiled)
+ // concepts zamiast enable if
 
- using Carnivore = Organism(true, false);
- using Omnivore = Organism(true, true);
- using Herbivore = Organism(false, true);
- using Plant = Organism(false, false);
-
+ // używać auto przy templatkach
 
  */
 
@@ -28,21 +28,37 @@ private:
     // metody umożliwiające eleganckie rozwiązanie zadania
 
 public:
-    Organism(species_t const &species, uint64_t vitality);
+    constexpr Organism(species_t const &species, uint64_t vitality) {
+        static_assert(std::equality_comparable<species_t>);
+        this->species = species;
+        this->vitality = vitality;
+    }
 
-    uint64_t get_vitality() {
+    constexpr uint64_t get_vitality() const {
         return this->vitality;
     }
 
-    const species_t &get_species() {
+    constexpr const species_t &get_species() const {
         return this->species;
     }
 
-    bool is_dead() {
+    constexpr bool is_dead() const {
         return (this->vitality == 0);
     }
 
 };
+
+template <typename species_t>
+using Carnivore = Organism<species_t, true, false>;
+
+template <typename species_t>
+using Omnivore = Organism<species_t, true, true>;
+
+template <typename species_t>
+using Herbivore = Organism<species_t, false, true>;
+
+template <typename species_t>
+using Plant = Organism<species_t, false, false>;
 
 template <typename species_t, bool sp1_eats_m, bool sp1_eats_p, bool sp2_eats_m, bool sp2_eats_p>
 constexpr std::tuple<Organism<species_t, sp1_eats_m, sp1_eats_p>,
