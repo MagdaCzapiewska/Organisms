@@ -19,7 +19,9 @@
 
  */
 
-template <typename species_t, bool can_eat_meat, bool can_eat_plants> class Organism {
+template <typename species_t, bool can_eat_meat, bool can_eat_plants>
+requires std::equality_comparable<species_t>
+class Organism {
     // typ species_t określa gatunek, powinien spełniać koncept std::equality_comparable
 
 private:
@@ -28,22 +30,19 @@ private:
     // metody umożliwiające eleganckie rozwiązanie zadania
 
 public:
-    constexpr Organism(species_t const &species, uint64_t vitality) {
-        static_assert(std::equality_comparable<species_t>);
-        this->species = species;
-        this->vitality = vitality;
-    }
+    constexpr Organism(species_t const &species, uint64_t vitality) : species(species), vitality(vitality) {};
+
 
     constexpr uint64_t get_vitality() const {
-        return this->vitality;
+        return vitality;
     }
 
     constexpr const species_t &get_species() const {
-        return this->species;
+        return species;
     }
 
     constexpr bool is_dead() const {
-        return (this->vitality == 0);
+        return vitality == 0;
     }
 
 };
