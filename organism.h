@@ -26,13 +26,23 @@ class Organism {
     // typ species_t określa gatunek, powinien spełniać koncept std::equality_comparable
 
 private:
-    species_t species;
-    uint64_t vitality;
+    const species_t species;
+    const uint64_t vitality;
+
+    constexpr bool is_plant() const {
+        return !can_eat_meat && !can_eat_plants;
+    }
+
+    constexpr bool can_eat(Organism o) const {
+        if (o.is_plant()) {
+            return can_eat_plants;
+        }
+        return can_eat_meat;
+    }
     // metody umożliwiające eleganckie rozwiązanie zadania
 
 public:
     constexpr Organism(species_t const &species, uint64_t vitality) : species(species), vitality(vitality) {};
-
 
     constexpr uint64_t get_vitality() const {
         return vitality;
@@ -46,6 +56,23 @@ public:
         return vitality == 0;
     }
 
+    constexpr Organism eat(Organism o) const {
+        if (can_eat(o)) {
+            if (vitality > o.get_vitality()) {
+                return Organism<species_t, can_eat_meat, can_eat_plants>
+                        (species, vitality + o.get_vitality() / (o.is_plant() ? 1 : 2));
+            }
+        }
+        if (o.can_eat(this)) {
+            return Organism<species_t, can_eat_meat, can_eat_plants>
+                    (species, (o.get_vitality() >= vitality) ? 0 : vitality);
+        }
+        return Organism<species_t, can_eat_meat, can_eat_plants> (species, vitality);
+    }
+
+    constexpr Organism breed(Organism o) const {
+        return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
+    }
 };
 
 template <typename species_t>
@@ -78,78 +105,10 @@ encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
             return std::make_tuple(
                     Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
                     Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
-                    Organism<species_t, sp1_eats_m, sp2_eats_p>
-                            (organism1.get_species(),(organism1.get_vitality() + organism2.get_vitality()) / 2));
+                    organism1.breed(organism2));
         }
     }
-    /*if (sp1_eats_m && sp1_eats_p) {
-        if (sp2_eats_m) {
-            //walcza
-        }
-        //zjada albo nie zjada
-    }
-    if (sp1_eats_m && !sp1_eats_p) {
-        if (sp2_eats_m) {
-            //walcza
-        }
-        if (sp2_eats_p) {
-            //zjada albo nie zjada
-        }
-        //sp2 jest roslina, wiec sp1 go nie zjada
-    }
-    if (!sp1_eats_m && sp1_eats_p) {
-        if (!sp2_eats_m && !sp2_eats_p) {
-            //zjada
-        }
-        if (sp2_eats_m) {
-            //org2 moze zjesc org1
-        }
-        //oboje jedza tylko rosliny wiec sie nie zjadaja
-    }*/
-    if (sp1_eats_m && sp2_eats_m) {
-        if (organism1.get_vitality() > organism2.get_vitality()) {
-            return std::make_tuple(
-                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality() + organism2.get_vitality() / 2),
-                    Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), 0),
-                    std::nullopt);
-        }
-        if (organism2.get_vitality() > organism1.get_vitality()) {
-            return std::make_tuple(
-                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), 0),
-                    Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality() + organism1.get_vitality() / 2),
-                    std::nullopt);
-        }
-        else {
-            return std::make_tuple(
-                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), 0),
-                    Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), 0),
-                    std::nullopt);
-        }
-    }
-    if ((!sp1_eats_p && !sp2_eats_m && !sp2_eats_p) || (!sp2_eats_p && !sp1_eats_m && !sp1_eats_p)) {
-        return std::make_tuple(
-                Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
-                Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
-                std::nullopt);
-    }
-    if (sp1_eats_p && !sp2_eats_m && !sp2_eats_p) {
-        return std::make_tuple(
-                Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality() + organism2.get_vitality()),
-                Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), 0),
-                std::nullopt);
-    }
-    if (sp2_eats_p && !sp1_eats_m && !sp1_eats_p) {
-        return std::make_tuple(
-                Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), 0),
-                Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality() + organism1.get_vitality()),
-                std::nullopt);
-    }
-    if (sp1_eats_m) {
-        //a zjada b
-    }
-    if(sp2_eats_m) {
-        //b zjada a
-    }
+   return std::make_tuple(organism1.eat(organism2), organism2.eat(organism1), std::nullopt);
 }
 
 template <typename species_t, bool sp1_eats_m, bool sp1_eats_p, typename ... Args>

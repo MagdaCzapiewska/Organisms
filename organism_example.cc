@@ -9,7 +9,7 @@ const species_id_t wolf_id = 2;
 const species_id_t pine_id = 3;
 const species_id_t elephant_id = 4;
 
-struct X { bool operator== (const X &) = delete; };
+/*struct X { bool operator== (const X &) = delete; };*/
 
 int main() {
 
@@ -18,16 +18,16 @@ int main() {
     constexpr Carnivore<species_id_t> wolf(wolf_id, 100);
     //constexpr Carnivore<X> wolf(X(), 100); - nie działa to dobrze :)
 
-    /*static_assert(wolf.get_vitality() == 100);
-    static_assert(wolf.is_dead() == false);*/
+    static_assert(wolf.get_vitality() == 100);
+    static_assert(wolf.is_dead() == false);
 
-    //constexpr auto encounter_result = encounter(wolf, dog);
-    //constexpr auto wolf_result = get<0>(encounter_result);
-    //constexpr auto dog_result = get<1>(encounter_result);
-    //constexpr auto child_result = get<2>(encounter_result);
+    constexpr auto encounter_result = encounter(wolf, dog);
+    constexpr auto wolf_result = get<0>(encounter_result);
+    constexpr auto dog_result = get<1>(encounter_result);
+    constexpr auto child_result = get<2>(encounter_result);
 
-    //static_assert(wolf_result.get_vitality() == 105);
-    //static_assert(dog_result.is_dead());
+    /*static_assert(wolf_result.get_vitality() == 105);
+    static_assert(dog_result.is_dead());*/
     //static_assert(!child_result.has_value());
 
     // Przykład użycia encounter_series:
