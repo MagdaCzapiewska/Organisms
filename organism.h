@@ -6,31 +6,13 @@
 #include <type_traits>
 #include <tuple>
 
-/*
-
- Koniecznie używać typename
-
- // użyć static_assert do sprawdzenia typów
- // korzystać z <type_traits>
- // if constexpr is evaluated at compile time, whereas if is not - zamiast SFINAE
- // (branches get be rejected at compile time and never be compiled)
- // concepts zamiast enable if
-
- // używać auto przy templatkach
-
- */
-
 template<typename species_t, bool can_eat_meat, bool can_eat_plants>
 requires std::equality_comparable<species_t>
 class Organism {
-    // typ species_t określa gatunek, powinien spełniać koncept std::equality_comparable
 
 private:
     const species_t &species;
     const uint64_t vitality;
-
-
-    // metody umożliwiające eleganckie rozwiązanie zadania
 
 public:
     constexpr Organism(species_t const &species, uint64_t vitality) : species(species), vitality(vitality) {};
@@ -63,14 +45,24 @@ public:
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
             eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
         if (can_eat(o)) {
+            if (o.is_plant()) {
+                return Organism<species_t, can_eat_meat, can_eat_plants>
+                        (species, vitality + o.get_vitality());
+            }
             if (vitality > o.get_vitality()) {
                 return Organism<species_t, can_eat_meat, can_eat_plants>
-                        (species, vitality + o.get_vitality() / (o.is_plant() ? 1 : 2));
+                        (species, vitality + o.get_vitality() / 2);
             }
         }
         if (o.can_eat(*this)) {
-            return Organism<species_t, can_eat_meat, can_eat_plants>
-                    (species, (o.get_vitality() >= vitality) ? 0 : vitality);
+            if (is_plant()) {
+                return Organism<species_t, can_eat_meat, can_eat_plants>
+                        (species, 0);
+            }
+            if (o.get_vitality() > vitality || (can_eat(o) && o.get_vitality() == vitality)) {
+                return Organism<species_t, can_eat_meat, can_eat_plants>
+                        (species, 0);
+            }
         }
         return *this;
     }
@@ -101,7 +93,7 @@ constexpr std::tuple<Organism<species_t, sp1_eats_m, sp1_eats_p>,
 encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
           Organism<species_t, sp2_eats_m, sp2_eats_p> organism2) {
     static_assert(!(!sp1_eats_m && !sp1_eats_p && !sp2_eats_m && !sp2_eats_p), "rosliny nie moga sie spotykac");
-    if (organism1.get_vitality() == 0 || organism2.get_vitality() == 0) {
+    if (organism1.is_dead() || organism2.is_dead()) {
         return std::make_tuple(
                 Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
                 Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
