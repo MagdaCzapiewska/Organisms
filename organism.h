@@ -26,19 +26,10 @@ class Organism {
     // typ species_t określa gatunek, powinien spełniać koncept std::equality_comparable
 
 private:
-    const species_t species;
+    const species_t &species;
     const uint64_t vitality;
 
-    constexpr bool is_plant() const {
-        return !can_eat_meat && !can_eat_plants;
-    }
 
-    constexpr bool can_eat(Organism o) const {
-        if (o.is_plant()) {
-            return can_eat_plants;
-        }
-        return can_eat_meat;
-    }
     // metody umożliwiające eleganckie rozwiązanie zadania
 
 public:
@@ -56,21 +47,34 @@ public:
         return vitality == 0;
     }
 
-    constexpr Organism eat(Organism o) const {
+    constexpr bool is_plant() const {
+        return !can_eat_meat && !can_eat_plants;
+    }
+
+    template <typename species_t2, bool can_eat_meat2, bool can_eat_plants2>
+    constexpr bool can_eat(Organism <species_t2, can_eat_meat2, can_eat_plants2> o) const {
+        if (o.is_plant()) {
+            return can_eat_plants;
+        }
+        return can_eat_meat;
+    }
+
+    template <typename species_t2, bool can_eat_meat2, bool can_eat_plants2>
+    constexpr Organism<species_t, can_eat_meat, can_eat_plants> eat(Organism <species_t2, can_eat_meat2, can_eat_plants2> o) const {
         if (can_eat(o)) {
             if (vitality > o.get_vitality()) {
                 return Organism<species_t, can_eat_meat, can_eat_plants>
                         (species, vitality + o.get_vitality() / (o.is_plant() ? 1 : 2));
             }
         }
-        if (o.can_eat(this)) {
+        if (o.can_eat(*this)) {
             return Organism<species_t, can_eat_meat, can_eat_plants>
                     (species, (o.get_vitality() >= vitality) ? 0 : vitality);
         }
-        return Organism<species_t, can_eat_meat, can_eat_plants> (species, vitality);
+        return *this;
     }
 
-    constexpr Organism breed(Organism o) const {
+   constexpr Organism breed(Organism o) const {
         return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
     }
 };
@@ -103,12 +107,13 @@ encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
     if (organism1.get_species() == organism2.get_species()) {
         if (sp1_eats_m == sp2_eats_m && sp1_eats_p == sp2_eats_p) {
             return std::make_tuple(
-                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
+                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality() + 5),
                     Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
-                    organism1.breed(organism2));
+                    std::nullopt);
         }
     }
-   return std::make_tuple(organism1.eat(organism2), organism2.eat(organism1), std::nullopt);
+    //return std::make_tuple(organism1, organism2, organism1);
+    return std::make_tuple(organism1.eat(organism2), organism2.eat(organism1), std::nullopt);
 }
 
 template <typename species_t, bool sp1_eats_m, bool sp1_eats_p, typename ... Args>
