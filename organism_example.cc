@@ -125,34 +125,34 @@ int main() {
 
     // roslinozerca miesozerca
     {
+        constexpr auto mr = encounter(wege1, mieso2);
+        constexpr auto mr_result1 = get<0>(mr);
+        constexpr auto mr_result2 = get<1>(mr);
+        constexpr auto mr_result3 = get<2>(mr);
+
+        static_assert(mr_result1.is_dead());
+        static_assert(mr_result2.get_vitality() == 250);
+        static_assert(!mr_result3.has_value());
+    }
+
+    {
+        constexpr auto mr = encounter(mieso2, wege1);
+        constexpr auto mr_result1 = get<0>(mr);
+        constexpr auto mr_result2 = get<1>(mr);
+        constexpr auto mr_result3 = get<2>(mr);
+
+        static_assert(mr_result1.get_vitality() == 250);
+        static_assert(mr_result2.is_dead());
+        static_assert(!mr_result3.has_value());
+    }
+
+    {
         constexpr auto mr = encounter(wege1, mieso1);
         constexpr auto mr_result1 = get<0>(mr);
         constexpr auto mr_result2 = get<1>(mr);
         constexpr auto mr_result3 = get<2>(mr);
 
         static_assert(mr_result1.get_vitality() == wege1.get_vitality());
-        static_assert(mr_result2.get_vitality() == mieso1.get_vitality());
-        static_assert(!mr_result3.has_value());
-    }
-
-    {
-        constexpr auto mr = encounter(roslina1, mieso2);
-        constexpr auto mr_result1 = get<0>(mr);
-        constexpr auto mr_result2 = get<1>(mr);
-        constexpr auto mr_result3 = get<2>(mr);
-
-        static_assert(mr_result1.get_vitality() == roslina1.get_vitality());
-        static_assert(mr_result2.get_vitality() == mieso2.get_vitality());
-        static_assert(!mr_result3.has_value());
-    }
-
-    {
-        constexpr auto mr = encounter(roslina2, mieso1);
-        constexpr auto mr_result1 = get<0>(mr);
-        constexpr auto mr_result2 = get<1>(mr);
-        constexpr auto mr_result3 = get<2>(mr);
-
-        static_assert(mr_result1.get_vitality() == roslina2.get_vitality());
         static_assert(mr_result2.get_vitality() == mieso1.get_vitality());
         static_assert(!mr_result3.has_value());
     }
