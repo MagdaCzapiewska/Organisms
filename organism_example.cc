@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include "organism.h"
 
 using namespace std;
@@ -8,6 +9,8 @@ const species_id_t dog_id = 1;
 const species_id_t wolf_id = 2;
 const species_id_t pine_id = 3;
 const species_id_t elephant_id = 4;
+
+const species_id_t wilk_id = 5;
 
 /*struct X { bool operator== (const X &) = delete; };*/
 
@@ -26,9 +29,23 @@ int main() {
     constexpr auto dog_result = get<1>(encounter_result);
     constexpr auto child_result = get<2>(encounter_result);
 
-    /*static_assert(wolf_result.get_vitality() == 105);
-    static_assert(dog_result.is_dead());*/
-    //static_assert(!child_result.has_value());
+    static_assert(wolf_result.get_vitality() == 105);
+    static_assert(dog_result.is_dead());
+    static_assert(!child_result.has_value());
+
+    //moje testy
+    constexpr Carnivore<species_id_t> wilk(wilk_id, 100);
+    constexpr Carnivore<species_id_t> wilczyca(wilk_id, 50);
+
+    constexpr auto gody = encounter(wilk, wilczyca);
+    constexpr auto wilk_wynik = get<0>(gody);
+    constexpr auto wilczyca_wynik = get<1>(gody);
+    constexpr auto wilczek = get<2>(gody);
+
+    static_assert(wilk_wynik.get_vitality() == 100);
+    static_assert(wilczyca_wynik.get_vitality() == 50);
+    static_assert(wilczek.has_value());
+    static_assert(wilczek->get_vitality());
 
     // Przykład użycia encounter_series:
     // wilk spotyka martwego psa (dog_result z przykładu powyżej – nic nie robi,
