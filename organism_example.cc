@@ -447,6 +447,14 @@ int main() {
     static_assert(!wolf_result_2.is_dead());
     static_assert(wolf_result_2.get_vitality() == 105);
 
+    // Takie coś nie działa - musi być minimum jeden argument
+    //constexpr auto wolf_result_3 = encounter_series();
+
+    // Mamy tylko organism1 i puste args:
+    constexpr auto wolf_result_4 = encounter_series(wolf_result_2);
+    static_assert(!wolf_result_4.is_dead());
+    static_assert(wolf_result_4.get_vitality() == 105);
+
     // Funkcja get_species() powinna zwracać gatunek.
     static_assert(wolf.get_species() == wolf_id);
 }
