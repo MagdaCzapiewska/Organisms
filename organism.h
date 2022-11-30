@@ -43,7 +43,7 @@ public:
 
     template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-            eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
+    eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
         if (can_eat(o)) {
             if (o.is_plant()) {
                 return Organism<species_t, can_eat_meat, can_eat_plants>
@@ -69,8 +69,14 @@ public:
 
     template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-            breed(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
-                return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
+    breed(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
+        return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
+    }
+
+    template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
+    constexpr Organism<species_t, can_eat_meat, can_eat_plants>
+    operator+(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> organism2) const {
+        return get<0>(encounter(*this, organism2));
     }
 };
 
@@ -92,7 +98,7 @@ constexpr std::tuple<Organism<species_t, sp1_eats_m, sp1_eats_p>,
         std::optional<Organism<species_t, sp1_eats_m, sp1_eats_p>>>
 encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
           Organism<species_t, sp2_eats_m, sp2_eats_p> organism2) {
-    static_assert(!(!sp1_eats_m && !sp1_eats_p && !sp2_eats_m && !sp2_eats_p), "rosliny nie moga sie spotykac");
+    static_assert(!(organism1.is_plant() && organism2.is_plant()), "rosliny nie moga sie spotykac");
     if (organism1.is_dead() || organism2.is_dead()) {
         return std::make_tuple(
                 Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
@@ -112,7 +118,9 @@ encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
 
 template<typename species_t, bool sp1_eats_m, bool sp1_eats_p, typename ... Args>
 constexpr Organism<species_t, sp1_eats_m, sp1_eats_p>
-encounter_series(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1, Args ... args);
+encounter_series(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1, Args ... args) {
+    return (organism1 + ... + args);
+}
 
 
 #endif // __ORGANISM_H__
