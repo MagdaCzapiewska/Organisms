@@ -6,8 +6,7 @@
 #include <type_traits>
 #include <tuple>
 
-template<typename species_t, bool can_eat_meat, bool can_eat_plants>
-requires std::equality_comparable<species_t>
+template<typename species_t, bool can_eat_meat, bool can_eat_plants> requires std::equality_comparable<species_t>
 class Organism {
 private:
     const species_t species;
@@ -33,7 +32,7 @@ public:
     }
 
     template<bool o_can_eat_meat, bool o_can_eat_plants>
-    constexpr bool can_eat(Organism <species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
+    constexpr bool can_eat(Organism<species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
         if (o.is_plant()) {
             return can_eat_plants;
         }
@@ -65,15 +64,19 @@ public:
     template<bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
     breed(Organism<species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
-        return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
+        return Organism<species_t, can_eat_meat, can_eat_plants>(species, (vitality + o.get_vitality()) / 2);
     }
 
-    template<bool o_can_eat_meat, bool o_can_eat_plants>
-    constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-    operator+(Organism<species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
-        return get<0>(encounter(*this, o));
-    }
 };
+
+namespace todo {
+    template<typename species_t, bool o1_can_eat_meat, bool o1_can_eat_plants, bool o2_can_eat_meat, bool o2_can_eat_plants>
+    constexpr Organism<species_t, o1_can_eat_meat, o1_can_eat_plants>
+    operator+(Organism<species_t, o1_can_eat_meat, o1_can_eat_plants> const o1,
+              Organism<species_t, o2_can_eat_meat, o2_can_eat_plants> const o2) {
+        return get<0>(encounter(o1, o2));
+    }
+}
 
 template<typename species_t>
 using Carnivore = Organism<species_t, true, false>;
@@ -89,8 +92,8 @@ using Plant = Organism<species_t, false, false>;
 
 template<typename species_t, bool o1_eats_m, bool o1_eats_p, bool o2_eats_m, bool o2_eats_p>
 constexpr std::tuple<Organism<species_t, o1_eats_m, o1_eats_p>,
-                     Organism<species_t, o2_eats_m, o2_eats_p>,
-                     std::optional<Organism<species_t, o1_eats_m, o1_eats_p>>>
+        Organism<species_t, o2_eats_m, o2_eats_p>,
+        std::optional<Organism<species_t, o1_eats_m, o1_eats_p>>>
 encounter(Organism<species_t, o1_eats_m, o1_eats_p> organism1, Organism<species_t, o2_eats_m, o2_eats_p> organism2) {
     static_assert(!(organism1.is_plant() && organism2.is_plant()), "plants can't meet - they don't move");
     if (organism1.is_dead() || organism2.is_dead()) {
@@ -107,6 +110,7 @@ encounter(Organism<species_t, o1_eats_m, o1_eats_p> organism1, Organism<species_
 template<typename species_t, bool o1_eats_m, bool o1_eats_p, typename ... Args>
 constexpr Organism<species_t, o1_eats_m, o1_eats_p>
 encounter_series(Organism<species_t, o1_eats_m, o1_eats_p> organism1, Args ... args) {
+    using namespace todo;
     return (organism1 + ... + args);
 }
 
