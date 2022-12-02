@@ -11,7 +11,7 @@ requires std::equality_comparable<species_t>
 class Organism {
 
 private:
-    const species_t &species;
+    const species_t species;
     const uint64_t vitality;
 
 public:
@@ -34,7 +34,7 @@ public:
     }
 
     template<typename species_t2, bool can_eat_meat2, bool can_eat_plants2>
-    constexpr bool can_eat(Organism <species_t2, can_eat_meat2, can_eat_plants2> o) const {
+    constexpr bool can_eat(Organism <species_t2, can_eat_meat2, can_eat_plants2> const o) const {
         if (o.is_plant()) {
             return can_eat_plants;
         }
@@ -43,7 +43,7 @@ public:
 
     template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-    eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
+    eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
         if (can_eat(o)) {
             if (o.is_plant()) {
                 return Organism<species_t, can_eat_meat, can_eat_plants>(species, vitality + o.get_vitality());
@@ -65,14 +65,14 @@ public:
 
     template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-    breed(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
+    breed(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
         return Organism<species_t, can_eat_meat, can_eat_plants> (species, (vitality + o.get_vitality()) / 2);
     }
 
     template<typename o_species_t, bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism<species_t, can_eat_meat, can_eat_plants>
-    operator+(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> organism2) const {
-        return get<0>(encounter(*this, organism2));
+    operator+(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> const o) const {
+        return get<0>(encounter(*this, o));
     }
 };
 
