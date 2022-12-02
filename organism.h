@@ -46,22 +46,18 @@ public:
             eat(Organism<o_species_t, o_can_eat_meat, o_can_eat_plants> o) const {
         if (can_eat(o)) {
             if (o.is_plant()) {
-                return Organism<species_t, can_eat_meat, can_eat_plants>
-                        (species, vitality + o.get_vitality());
+                return Organism<species_t, can_eat_meat, can_eat_plants>(species, vitality + o.get_vitality());
             }
             if (vitality > o.get_vitality()) {
-                return Organism<species_t, can_eat_meat, can_eat_plants>
-                        (species, vitality + o.get_vitality() / 2);
+                return Organism<species_t, can_eat_meat, can_eat_plants>(species, vitality + o.get_vitality() / 2);
             }
         }
         if (o.can_eat(*this)) {
             if (is_plant()) {
-                return Organism<species_t, can_eat_meat, can_eat_plants>
-                        (species, 0);
+                return Organism<species_t, can_eat_meat, can_eat_plants>(species, 0);
             }
             if (o.get_vitality() > vitality || (can_eat(o) && o.get_vitality() == vitality)) {
-                return Organism<species_t, can_eat_meat, can_eat_plants>
-                        (species, 0);
+                return Organism<species_t, can_eat_meat, can_eat_plants>(species, 0);
             }
         }
         return *this;
@@ -88,26 +84,19 @@ using Plant = Organism<species_t, false, false>;
 
 template<typename species_t, bool sp1_eats_m, bool sp1_eats_p, bool sp2_eats_m, bool sp2_eats_p>
 constexpr std::tuple<Organism<species_t, sp1_eats_m, sp1_eats_p>,
-        Organism<species_t, sp2_eats_m, sp2_eats_p>,
-        std::optional<Organism<species_t, sp1_eats_m, sp1_eats_p>>>
-encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
-          Organism<species_t, sp2_eats_m, sp2_eats_p> organism2) {
-    static_assert(!(!sp1_eats_m && !sp1_eats_p && !sp2_eats_m && !sp2_eats_p), "rosliny nie moga sie spotykac");
+                     Organism<species_t, sp2_eats_m, sp2_eats_p>,
+                     std::optional<Organism<species_t, sp1_eats_m, sp1_eats_p>>>
+encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1, Organism<species_t, sp2_eats_m, sp2_eats_p> organism2) {
+    static_assert(!(!sp1_eats_m && !sp1_eats_p && !sp2_eats_m && !sp2_eats_p), "plants can't meet - they don't move");
     if (organism1.is_dead() || organism2.is_dead()) {
-        return std::make_tuple(
-                Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
-                Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
-                std::nullopt);
+        return {organism1, organism2, std::nullopt};
     }
     if (organism1.get_species() == organism2.get_species()) {
         if (sp1_eats_m == sp2_eats_m && sp1_eats_p == sp2_eats_p) {
-            return std::make_tuple(
-                    Organism<species_t, sp1_eats_m, sp1_eats_p> (organism1.get_species(), organism1.get_vitality()),
-                    Organism<species_t, sp2_eats_m, sp2_eats_p> (organism2.get_species(), organism2.get_vitality()),
-                    organism1.breed(organism2));
+            return {organism1, organism2, organism1.breed(organism2)};
         }
     }
-    return std::make_tuple(organism1.eat(organism2), organism2.eat(organism1), std::nullopt);
+    return {organism1.eat(organism2), organism2.eat(organism1), std::nullopt};
 }
 
 template<typename species_t, bool sp1_eats_m, bool sp1_eats_p, typename ... Args>
