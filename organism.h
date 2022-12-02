@@ -94,7 +94,7 @@ constexpr std::tuple<Organism<species_t, sp1_eats_m, sp1_eats_p>,
         std::optional<Organism<species_t, sp1_eats_m, sp1_eats_p>>>
 encounter(Organism<species_t, sp1_eats_m, sp1_eats_p> organism1,
           Organism<species_t, sp2_eats_m, sp2_eats_p> organism2) {
-    static_assert(!(organism1.is_plant() && organism2.is_plant()), "rosliny nie moga sie spotykac");
+    static_assert(!(organism1.is_plant() && organism2.is_plant()), "plants can't meet - they don't move");
     if (organism1.is_dead() || organism2.is_dead()) {
         return {organism1, organism2, std::nullopt};
     }
