@@ -77,6 +77,9 @@ int main() {
     constexpr Plant<species_id_t> roslina1(p1, 100);
     constexpr Plant<species_id_t> roslina2(p2, 200);
 
+    // To powinno sygnalizowac blad i sygnalizuje
+    //constexpr auto zle = encounter(roslina1, roslina2);
+
     constexpr Omnivore<species_id_t> wszystko1(w1, 100);
     constexpr Omnivore<species_id_t> wszystko2(w2, 200);
     constexpr Omnivore<species_id_t> wszystko3(w2, 100);
@@ -252,7 +255,7 @@ int main() {
         static_assert(rp_result2.get_vitality() == 300);
         static_assert(!rp_result3.has_value());
     }
-    
+
     // wszystkozerca wszystkozerca
     {
         constexpr auto ww = encounter(wszystko2, wszystko1);
@@ -264,7 +267,7 @@ int main() {
         static_assert(ww_result2.is_dead());
         static_assert(!ww_result3.has_value());
     }
-    
+
     // drugi wygrywa
     {
         constexpr auto ww = encounter(wszystko1, wszystko2);
@@ -276,7 +279,7 @@ int main() {
         static_assert(ww_result2.get_vitality() == 250);
         static_assert(!ww_result3.has_value());
     }
-    
+
     // wyniszczająca walka
     {
         constexpr auto ww = encounter(wszystko1, wszystko3);
@@ -437,13 +440,21 @@ int main() {
     // wilk spotyka martwego psa (dog_result z przykładu powyżej – nic nie robi,
     // sosnę – nic nie robi, psa, którego zjada, i słonia , który jest zbyt
     // silny, żeby go zjeść, zatem nic nie robi.
-    //constexpr Plant<species_id_t> pine(pine_id, 34);
-    //constexpr Herbivore<species_id_t> elephant(elephant_id, 500);
-    //constexpr auto wolf_result_2 = encounter_series(wolf, dog_result, pine, dog, elephant);
+    constexpr Plant<species_id_t> pine(pine_id, 34);
+    constexpr Herbivore<species_id_t> elephant(elephant_id, 500);
+    constexpr auto wolf_result_2 = encounter_series(wolf, dog_result, pine, dog, elephant);
 
-    //static_assert(!wolf_result_2.is_dead());
-    //static_assert(wolf_result_2.get_vitality() == 105);
+    static_assert(!wolf_result_2.is_dead());
+    static_assert(wolf_result_2.get_vitality() == 105);
+
+    // Takie coś nie działa - musi być minimum jeden argument
+    //constexpr auto wolf_result_3 = encounter_series();
+
+    // Mamy tylko organism1 i puste args:
+    constexpr auto wolf_result_4 = encounter_series(wolf_result_2);
+    static_assert(!wolf_result_4.is_dead());
+    static_assert(wolf_result_4.get_vitality() == 105);
 
     // Funkcja get_species() powinna zwracać gatunek.
-    //static_assert(wolf.get_species() == wolf_id);
+    static_assert(wolf.get_species() == wolf_id);
 }
