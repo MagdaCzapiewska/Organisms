@@ -69,7 +69,7 @@ public:
 
 };
 
-namespace todo {
+namespace organism_operators {
     template<typename species_t, bool o1_can_eat_meat, bool o1_can_eat_plants, bool o2_can_eat_meat, bool o2_can_eat_plants>
     constexpr Organism<species_t, o1_can_eat_meat, o1_can_eat_plants>
     operator+(Organism<species_t, o1_can_eat_meat, o1_can_eat_plants> const o1,
@@ -110,7 +110,7 @@ encounter(Organism<species_t, o1_eats_m, o1_eats_p> organism1, Organism<species_
 template<typename species_t, bool o1_eats_m, bool o1_eats_p, typename ... Args>
 constexpr Organism<species_t, o1_eats_m, o1_eats_p>
 encounter_series(Organism<species_t, o1_eats_m, o1_eats_p> organism1, Args ... args) {
-    using namespace todo;
+    using namespace organism_operators;
     return (organism1 + ... + args);
 }
 
