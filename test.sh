@@ -16,6 +16,5 @@ do
     g++ -std=c++20 -Wall -Wextra -O2 -DTEST_NUM=$a organism_test.cc -o organism
     ./organism
 
-    echo "ma sie nie kompilowac"
-    echo "$a"
+    echo "$(tput bold)$(tput setaf 1)MA SIE NIE KOMPILOWAC :) NUMER TESTU: $a"
 done
