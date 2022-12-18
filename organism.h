@@ -1,6 +1,7 @@
 #ifndef __ORGANISM_H__
 #define __ORGANISM_H__
 
+#include <cstdint>
 #include <concepts>
 #include <optional>
 #include <type_traits>
@@ -55,7 +56,8 @@ public:
 
     template<bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism breed(Organism<species_t, o_can_eat_meat, o_can_eat_plants> const &o) const {
-        return {species, (vitality + o.get_vitality()) / 2};
+        return {species, std::min(o.get_vitality(), vitality) +
+                        (std::max(o.get_vitality(), vitality) - std::min(o.get_vitality(), vitality)) / 2};
     }
 
 };
