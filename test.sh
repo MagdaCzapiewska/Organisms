@@ -7,6 +7,7 @@ do
             a=$(($i*100 + $j))
             g++ -std=c++20 -Wall -Wextra -O2 -DTEST_NUM=$a organism_test.cc -o organism
             ./organism
+            echo "$(tput bold)$(tput setaf 1)NUMER TESTU: $a"
         fi
     done
 done

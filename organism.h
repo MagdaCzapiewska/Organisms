@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <concepts>
 #include <optional>
+#include <numeric>
 #include <type_traits>
 #include <tuple>
 
@@ -56,8 +57,7 @@ public:
 
     template<bool o_can_eat_meat, bool o_can_eat_plants>
     constexpr Organism breed(Organism<species_t, o_can_eat_meat, o_can_eat_plants> const &o) const {
-        return {species, std::min(o.get_vitality(), vitality) +
-                        (std::max(o.get_vitality(), vitality) - std::min(o.get_vitality(), vitality)) / 2};
+        return {species, std::midpoint(std::min(vitality, o.get_vitality()), std::max(vitality, o.get_vitality()))};
     }
 
 };
